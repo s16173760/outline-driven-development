@@ -7,7 +7,7 @@
 
 ## Prerequisites
 
-`ast-grep` | `ripgrep` | `fd` | `eza` | `lsd` | `tokei` | `bat` | `just` | `git-branchless` | `difftastic` | `procs` | `fend` | `hck` | `lemmeknow` | `hyperfine` | +`other tools` | `MCPs` (**context7**, **sequentialthinking-tools**, **actor-critic-thinking**, **shannon-thinking**, **repomix**)
+`ast-grep` | `ripgrep` | `fd` | `eza` | `lsd` | `tokei` | `bat` | `just` | `git-branchless` | `difftastic` | `procs` | `fend` | `hck` | `dprint` | `hyperfine` | +`other tools` | `MCPs` (**context7**, **sequentialthinking-tools**, **actor-critic-thinking**, **shannon-thinking**, **repomix**)
 
 ### Install Various Rust-based CLI Tools with highest native optimizations through cargo
 
@@ -15,44 +15,27 @@
 
 <https://rustup.rs/>
 
-#### Install with cargo-binstall
-
-**Install**
-
-```bash
-export RUSTFLAGS="-C target-cpu=native -C opt-level=3 -C codegen-units=1 -C strip=symbols"
-
-cargo install --locked cargo-binstall
-cargo install ast-grep ripgrep fd-find eza lsd tokei
-cargo binstall -y bat git-delta just raff-cli difftastic git-branchless zoxide procs bfs fselect tealdeer srgn nomino shellharden grex mergiraf jaq jql hck huniq lemmeknow hyperfine rargs eva fend rip2 sccache
-```
-
 #### Linux/macOS with cargo
 
 **Install**
 
 ```bash
-export RUSTFLAGS="-C target-cpu=native -C opt-level=3 -C codegen-units=1 -C strip=symbols"
-cargo install -q ast-grep ripgrep fd-find eza lsd tokei bat git-delta just raff-cli tree-sitter-cli difftastic git-branchless zoxide procs bfs fselect tealdeer srgn nomino shellharden grex mergiraf jaq jql hck huniq lemmeknow hyperfine rargs eva fend
+export RUSTFLAGS="-C target-cpu=native -C link-arg=-fuse-ld=mold -C opt-level=3 -C strip=symbols -C panic=abort -C lto=thin"
+
+cargo install --locked cargo-binstall
+cargo install ast-grep ripgrep fd-find eza lsd
+cargo binstall -y bat tokei git-delta just raff-cli difftastic git-branchless zoxide procs bfs fselect tealdeer srgn nomino shellharden grex mergiraf jaq jql hck huniq lemmeknow hyperfine rargs eva fend rip2 sccache
 ```
 
 #### Windows with cargo
 
 **Install (run inside powershell)**
 ```powershell
-$env:RUSTFLAGS="-C target-cpu=native -C opt-level=3 -C codegen-units=1 -C strip=symbols -C link-arg=/LTCG -C link-arg=/OPT:REF"
+$env:RUSTFLAGS="-C target-cpu=native -C opt-level=3 -C strip=symbols -C panic=abort -C lto=thin -C link-arg=/LTCG -C link-arg=/OPT:REF"
 
-cargo install -q ast-grep ripgrep fd-find eza lsd tokei bat git-delta just raff-cli tree-sitter-cli difftastic git-branchless zoxide procs bfs fselect tealdeer srgn nomino shellharden grex mergiraf jaq jql hck huniq lemmeknow hyperfine rargs eva fend
-```
-
-#### Install Landrun (CLI Sandbox)
-
-Install go if not installed: <https://go.dev/dl/>
-
-##### Install
-
-```bash
-go install github.com/zouuup/landrun/cmd/landrun@latest
+cargo install --locked cargo-binstall
+cargo install ast-grep ripgrep fd-find eza lsd
+cargo binstall -y bat tokei git-delta just raff-cli difftastic git-branchless zoxide procs bfs fselect tealdeer srgn nomino shellharden grex mergiraf jaq jql hck huniq lemmeknow hyperfine rargs eva fend rip2 sccache
 ```
 
 ## Installation

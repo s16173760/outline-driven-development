@@ -13,42 +13,29 @@
 
 #### Install Cargo (if not installed)
 
-**Linux/macOS**
-```bash
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-```
-
-**Windows**
-<https://win.rustup.rs/x86_64>
-
-#### Install with cargo-binstall
-
-**Install**
-
-```bash
-export RUSTFLAGS="-C target-cpu=native -C opt-level=3 -C codegen-units=1 -C strip=symbols"
-
-cargo install --locked cargo-binstall
-cargo install ast-grep ripgrep fd-find eza lsd tokei
-cargo binstall -y bat git-delta just raff-cli difftastic git-branchless zoxide procs bfs fselect tealdeer srgn nomino shellharden grex mergiraf jaq jql hck huniq lemmeknow hyperfine rargs eva fend rip2 sccache
-```
+<https://rustup.rs/>
 
 #### Linux/macOS with cargo
 
 **Install**
 
 ```bash
-export RUSTFLAGS="-C target-cpu=native -C opt-level=3 -C codegen-units=1 -C strip=symbols"
-cargo install -q ast-grep ripgrep fd-find eza lsd tokei bat git-delta just raff-cli tree-sitter-cli difftastic git-branchless zoxide procs bfs fselect tealdeer srgn nomino shellharden grex mergiraf jaq jql hck huniq lemmeknow hyperfine rargs eva fend
+export RUSTFLAGS="-C target-cpu=native -C link-arg=-fuse-ld=mold -C opt-level=3 -C strip=symbols -C panic=abort -C lto=thin"
+
+cargo install --locked cargo-binstall
+cargo install ast-grep ripgrep fd-find eza lsd
+cargo binstall -y bat tokei git-delta just raff-cli difftastic git-branchless zoxide procs bfs fselect tealdeer srgn nomino shellharden grex mergiraf jaq jql hck huniq lemmeknow hyperfine rargs eva fend rip2 sccache
 ```
 
 #### Windows with cargo
 
 **Install (run inside powershell)**
 ```powershell
-$env:RUSTFLAGS="-C target-cpu=native -C opt-level=3 -C codegen-units=1 -C strip=symbols -C link-arg=/LTCG -C link-arg=/OPT:REF"
+$env:RUSTFLAGS="-C target-cpu=native -C opt-level=3 -C strip=symbols -C panic=abort -C lto=thin -C link-arg=/LTCG -C link-arg=/OPT:REF"
 
-cargo install -q ast-grep ripgrep fd-find eza lsd tokei bat git-delta just raff-cli tree-sitter-cli difftastic git-branchless zoxide procs bfs fselect tealdeer srgn nomino shellharden grex mergiraf jaq jql hck huniq lemmeknow hyperfine rargs eva fend
+cargo install --locked cargo-binstall
+cargo install ast-grep ripgrep fd-find eza lsd
+cargo binstall -y bat tokei git-delta just raff-cli difftastic git-branchless zoxide procs bfs fselect tealdeer srgn nomino shellharden grex mergiraf jaq jql hck huniq lemmeknow hyperfine rargs eva fend rip2 sccache
 ```
 
 #### Install Landrun (CLI Sandbox)
