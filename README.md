@@ -7,7 +7,7 @@
 
 ## Prerequisites
 
-`ast-grep` | `ripgrep` | `fd` | `eza` | `lsd` | `tokei` | `bat` | `just` | `git-branchless` | `difftastic` | `procs` | `fend` | `hck` | `dprint` | `hyperfine` | +`other tools` | `MCPs` (**context7**, **sequentialthinking-tools**, **actor-critic-thinking**, **shannon-thinking**, **repomix**)
+`ast-grep` | `ripgrep` | `fd` | `eza` | `lsd` | `tokei` | `bat` | `just` | `git-branchless` | `difftastic` | `procs` | `fend` | `hck` | `hyperfine` | +`other tools` | `MCPs` (**context7**, **sequentialthinking-tools**, **actor-critic-thinking**, **shannon-thinking**, **repomix**)
 
 ### Install Various Rust-based CLI Tools with highest native optimizations through cargo
 
