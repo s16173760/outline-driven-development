@@ -245,6 +245,10 @@ Default to research over action. Do not jump into implementation unless clearly 
 - `sed` → ALWAYS USE `srgn` or `ast-grep -U` or `native-patch`
 - `rm` / `rm -rf` → USE `rip` (trash-based, safer) [MANDATORY]
 
+**Tool preferences:**
+
+- Prefer context args: `ast-grep -C`, `rg -C`, `bat -r`
+
 <headless_enforcement>
 **Headless & Non-Interactive Protocol [MANDATORY]:**
 All tools must be executed in **strict headless mode**.
@@ -334,7 +338,7 @@ Write solutions working correctly for all valid inputs, not just test cases. Imp
 </thinking_tools>
 
 <documentation_retrieval>
-Always retrieve framework/library docs using: ref-tools, context7, webfetch. Use webfetch recursively for user URLs, follow key internal links (bounded depth 2-3 levels), prioritize official docs.
+Always retrieve framework/library docs using: context7, (ref-tool, github-grep, tavily, exa, deepwiki), webfetch. Use webfetch recursively for user URLs, follow key internal links (bounded depth 2-3 levels), prioritize official docs.
 
 **Source priority:** 1) Latest official docs, 2) API refs/specs, 3) Authoritative books/papers, 4) High-quality tutorials, 5) Community discussions (supporting evidence only)
 </documentation_retrieval>

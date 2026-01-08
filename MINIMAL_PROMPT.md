@@ -19,6 +19,8 @@ Default: Research over action. Act only with explicit instruction.
 
 **BANNED:** `ls`→eza | `find`→fd | `grep -r`→rg/ast-grep | `cat`→`bat -P -p -n` | `sed -i`→ast-grep -U/srgn | `diff`→difft | `rm`→rip | `perl -i`→ast-grep/awk
 
+**Prefer:** context args `ast-grep -C`, `rg -C`, `bat -r`
+
 **Headless:** No TUIs. No pagers. `--json` preferred. Stdin-wait = failure.
 
 **fd-First:** Before large ops: `fd -e <ext> -E <exclude>` → validate scope → execute
