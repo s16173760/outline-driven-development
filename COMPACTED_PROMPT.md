@@ -143,32 +143,13 @@ ALWAYS think, reason, act, respond in English regardless of the user's language.
 | Branch | `git branch <branch-name>` | Create branch at HEAD |
 | Push | `git push -u origin <branch-name>` or `git branchless submit` | Push to remote/forge |
 
-**Move Operations:**
-* `git move -s <commit> -d <dest>` (Move commit + descendants)
-* `git move -x <commit> -d <dest>` (Move exact commit, no descendants)
-* `git move -b <branch> -d <dest>` (Move entire branch stack)
-* `git move --fixup` (Combine commits) | `git move --insert` (Insert between commits)
+**Move Operations:** `move -s <commit> -d <dest>` (+ descendants) | `-x` (exact) | `-b <branch>` (stack) | `--fixup` (combine) | `--insert`
 
-**Query Language (Revsets):**
-* **Draft/Stack:** `draft()` | `stack()` | `branches()`
-* **Author/Message:** `author.name("Alice")` | `message("fix bug")`
-* **Paths:** `paths.changed("src/*.rs")`
-* **Relations:** `ancestors(<rev>)` | `descendants(<rev>)` | `children(<rev>)` | `parents(<rev>)`
-* **Operations:** `<set1> | <set2>` (union) | `<set1> & <set2>` (intersection) | `<set1> - <set2>` (difference) | `<set1> % <set2>` (only)
-* **Tests:** `tests.passed()` | `tests.failed("<cmd>")`
-* **Shortcuts:** `:<rev>` (ancestors) | `<rev>:` (descendants)
-* **Usage:** `git query '<revset>'` | `git smartlog '<revset>'` | `git sync '<revset>'`
+**Revsets:** `draft()` | `stack()` | `branches()` | `author.name("X")` | `message("X")` | `paths.changed("*.rs")` | `ancestors/descendants/children/parents(<rev>)` | Set ops: `|` `&` `-` `%` | `:<rev>` (ancestors) | `<rev>:` (descendants) | Usage: `git query/smartlog/sync '<revset>'`
 
-**Recovery & Cleanup:**
-* **Undo:** `git branchless undo` (Undo last operation) | `git branchless undo -i` (Interactive time-travel)
-* **Restack:** `git branchless restack` (Fix abandoned commits after amends/rewrites)
-* **Hide/Unhide:** `git hide <commit>` | `git hide '<revset>'` | `git unhide <commit>`
-* **Test:** `git test run '<revset>' --exec '<cmd>'` | `git test show` | `git test run 'tests.failed()' --exec '<cmd>'`
+**Recovery:** `undo` (last op) | `undo -i` (time-travel) | `restack` (fix abandoned) | `hide/unhide <commit>` | `test run '<revset>' --exec '<cmd>'`
 
-**Advanced:**
-* **Record:** `git record` (Interactive commit creation) | `git record --amend` (Interactive amend)
-* **Reword:** `git reword <commit>` | `git reword '<revset>'` (Edit commit messages)
-* **Split:** `git split <commit>` (Split commit into multiple, auto-restacks descendants)
+**Advanced:** `record` (interactive commit) | `reword <commit>` | `split <commit>` (auto-restacks)
 
 **Commit Types:** feat (MINOR), fix (PATCH), build, chore, ci, docs, perf, refactor, style, test
 
@@ -235,9 +216,11 @@ ALWAYS think, reason, act, respond in English regardless of the user's language.
 | 12 | fend | Unit-aware calculator |
 
 **Selection Guide:**
-- Discovery → fd | Code pattern → ast-grep | Simple edit → srgn
+- Discovery → fd | Scoped ops → srgn | Structural patterns → ast-grep
 - Multi-file atomic → Edit suite | Text/comments → rg | Scope → tokei | VCS → git-branchless
 - JSON → jql (default) | Complex JSON → jaq (jq-compatible) | Dedupe → huniq | Calc → fend
+
+**Transform Selection:** Scoped regex → srgn (tree-sitter) | Structural rewrite → ast-grep | Both 1st-tier
 
 **Workflow:** fd (discover) → ast-grep/rg (search) → Edit suite (transform) → git (commit) → git-branchless (manage)
 
@@ -319,7 +302,12 @@ All tools must be executed in **strict headless mode**.
 - **tokei:** `tokei src/` | `tokei --output json`
 - **difft:** `difft --display inline original modified`
 
-**srgn Flags:** `--python`, `--typescript`, `--rust`, `--go`, `--glob`, `--dry-run`, `-d` (delete), `-u` (upper), `-l` (lower)
+**srgn [1ST TIER]:** `--<lang> <scope> 'pattern' -- 'replacement'`
+- **Languages:** `--python`, `--rust`, `--typescript`, `--go`, `--c`, `--csharp`, `--hcl`
+- **Scopes:** comments, strings, imports, fn/func/def, class, etc. (language-specific)
+- **Actions:** `-d` (delete), `-u/-l/-t` (case), `-s` (squeeze), `-S` (symbols)
+- **Options:** `--glob`, `--dry-run`, `-j` (join scopes), `--invert`
+- **Filter:** `fn~PATTERN` (Rust), `func~PATTERN` (Go)
 
 **repomix Options:** `compress` (70% token reduction, **recommended**), `includePatterns`, `ignorePatterns`, `style` (xml/markdown/json/plain)
 
