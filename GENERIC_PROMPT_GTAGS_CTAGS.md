@@ -319,20 +319,25 @@ AST-based search/transform. 90% error reduction, 10x accurate. Language-aware (J
 - **Inside:** `ast-grep scan --inline-rules 'rule: { pattern: "return $A", inside: { kind: "function", pattern: { regex: "^test" } } }'`
 - **Strict:** `ast-grep scan --inline-rules 'rule: { pattern: "$A + $B", constraints: { A: { kind: "string" } } }'`
 
-### 2) srgn [GRAMMAR-AWARE REGEX]
-Surgical regex/grammar replacement. Understands source code syntax for precise manipulation.
-
-**Use for:** Language-aware regex replacement, comment manipulation, simple pattern edits.
-
-**Key flags:** `--python`, `--typescript`, `--rust`, `--go`, `--glob`, `--dry-run`, `-d` (delete), `-u` (upper), `-l` (lower)
-
-**Examples:**
-- **Basic replace:** `echo 'Hello World' | srgn 'World' -- 'Universe'`
-- **Delete pattern:** `echo 'Hello!' | srgn -d '!'`
-- **Python comments:** `cat file.py | srgn --python 'comments' 'TODO' -- 'DONE'`
-- **TypeScript scoped:** `cat file.ts | srgn --typescript 'comments' 'TODO(?=:)' -- 'TODO(@assignee)'`
-- **Glob files:** `srgn --glob '*.py' 'old_fn' -- 'new_fn'`
-- **Dry-run preview:** `srgn --dry-run --glob '*.rs' 'pattern' -- 'replacement'`
+- **`srgn`** [GRAMMAR-AWARE - 1ST TIER]: Tree-sitter search/replace. "Mix of tr, sed, ripgrep and tree-sitter."
+  - **Modes:** Action (transform) | Search (no action + `--<lang>` → ripgrep-like code search)
+  - **Languages:** `--python`/`--py`, `--rust`/`--rs`, `--typescript`/`--ts`, `--go`, `--c`, `--csharp`/`--cs`, `--hcl`
+  - **Prepared Scopes:**
+    - Python: comments, strings, imports, doc-strings, function-names, function-calls, class, def, async-def, methods, identifiers
+    - Rust: comments, doc-comments, uses, strings, struct, enum, fn, impl-fn, pub-fn, const-fn, async-fn, test-fn, trait, impl, mod (supports `fn~PATTERN`, `struct~PATTERN`, `mod~PATTERN`)
+    - TypeScript: comments, strings, imports, function, async-function, method, constructor, class, enum, interface, type-alias
+    - Go: comments, strings, imports, struct, interface, func, method, free-func, type-params, defer (supports `func~PATTERN`, `struct~PATTERN`)
+  - **Scope Logic:** Multiple `--<lang>` scopes AND together by default; use `-j` to OR them
+  - **Dynamic Filter:** `fn~PATTERN`, `struct~[tT]est`, `func~Handle` (regex on element name)
+  - **Actions:** `-d` (delete), `-u/-l/-t` (case), `-s` (squeeze), `-S` (symbols)
+  - **Options:** `--glob`, `--dry-run`, `-j` (OR scopes), `--invert`, `-L` (literal), `--fail-none`
+  - **Examples:**
+    - `srgn --python comments 'TODO' -- 'DONE'` (replace in comments)
+    - `srgn --rust fn 'old_name' -- 'new_name'` (rename in all functions)
+    - `srgn --rust 'fn~handle' 'error' -- 'err'` (only fns matching "handle")
+    - `srgn --go 'struct~[tT]est'` (search: find test-related structs)
+    - `srgn --rust pub-enum --rust type-identifier 'Type'` (intersect: Type in pub enums only)
+  - **vs ast-grep:** srgn = scoped regex within AST (simpler) | ast-grep = structural patterns with metavariables
 
 ### 3) native-patch [FILE EDITING]
 Workspace editing tools. Excellent for straightforward edits, multi-file changes, simple line mods.

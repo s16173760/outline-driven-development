@@ -243,15 +243,21 @@ All tools must be executed in **strict headless mode**.
 - **fd (discovery - FIRST):** `fd -e py -E venv` | `fd . src/ -e ts` | `fd -g '*.test.ts'` | `fd -e rs -x rustfmt {}`
 - **ast-grep search:** `ast-grep -p 'function $NAME($$$) {}' -l js -C 3`
 - **ast-grep edit:** `ast-grep -p 'old($A)' -r 'new($A)' -l js -C 2` then `-U`
-- **srgn (grammar-aware):** `srgn --python 'comments' 'TODO' -- 'DONE'` | `srgn --glob '*.rs' 'old' -- 'new'`
+- **srgn [1ST TIER]:** `--<lang> <scope> 'pattern' -- 'replacement'`
+  - **Modes:** Action (transform) | Search (no action → ripgrep-like)
+  - **Languages:** `--python`, `--rust`, `--typescript`, `--go`, `--c`, `--csharp`, `--hcl`
+  - **Scopes:** comments, strings, imports, fn/func/def, class, struct, enum, etc.
+  - **Dynamic Filter:** `fn~PATTERN`, `struct~[tT]est`, `func~Handle` (regex on name)
+  - **Scope Logic:** Multiple scopes AND (use `-j` to OR)
+  - **Actions:** `-d` (delete), `-u/-l/-t` (case), `-s` (squeeze), `-S` (symbols)
+  - **Options:** `--glob`, `--dry-run`, `-j`, `--invert`, `-L`, `--fail-none`
+  - **Search:** `srgn --python class 'pattern'` (no action = search mode)
 - **repomix (MCP):** `pack_codebase(directory="src")` | `pack_remote_repository(remote="url")` | `grep_repomix_output(outputId, pattern)`
 - **eza:** `eza --tree --level 3 --git-ignore`
 - **tokei:** `tokei src/` | `tokei --output json`
 - **difft:** `difft --display inline original modified`
 - **gtags/global:** `gtags` (index) | `global <sym>` (defs) | `global -r <sym>` (refs) | `global -u` (update)
 - **ctags:** `ctags -R .` | `ctags -R --exclude=node_modules .` | `ctags --output-format=json -R .`
-
-**srgn Flags:** `--python`, `--typescript`, `--rust`, `--go`, `--glob`, `--dry-run`, `-d` (delete), `-u` (upper), `-l` (lower)
 
 **repomix Options:** `compress` (70% token reduction), `includePatterns`, `ignorePatterns`, `style` (xml/markdown/json/plain)
 

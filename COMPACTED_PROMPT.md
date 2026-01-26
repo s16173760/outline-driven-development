@@ -303,11 +303,15 @@ All tools must be executed in **strict headless mode**.
 - **difft:** `difft --display inline original modified`
 
 **srgn [1ST TIER]:** `--<lang> <scope> 'pattern' -- 'replacement'`
+- **Modes:** Action (transform) | Search (no action → ripgrep-like code search)
 - **Languages:** `--python`, `--rust`, `--typescript`, `--go`, `--c`, `--csharp`, `--hcl`
-- **Scopes:** comments, strings, imports, fn/func/def, class, etc. (language-specific)
-- **Actions:** `-d` (delete), `-u/-l/-t` (case), `-s` (squeeze), `-S` (symbols)
-- **Options:** `--glob`, `--dry-run`, `-j` (join scopes), `--invert`
-- **Filter:** `fn~PATTERN` (Rust), `func~PATTERN` (Go)
+- **Scopes:** comments, strings, imports, fn/func/def, class, struct, enum, trait, mod, etc. (language-specific)
+- **Composable Actions:** `-u/-l/-t` (case), `-n` (normalize), `-g` (german), `-S` (symbols: →, ≠, ≤, ≥)
+- **Standalone Actions:** `-d` (delete), `-s` (squeeze)
+- **Options:** `--glob`, `--dry-run`, `-j` (OR scopes, default AND), `--invert`, `-L` (literal), `--fail-none`
+- **Dynamic Filter:** `fn~PATTERN`, `struct~[tT]est`, `func~Handle` (regex on element names)
+- **Scope Intersection:** `srgn --rust pub-enum --rust type-identifier 'Type'` (AND by default)
+- **Search Mode:** `srgn --go 'struct~[tT]est'` (no action = search)
 
 **repomix Options:** `compress` (70% token reduction, **recommended**), `includePatterns`, `ignorePatterns`, `style` (xml/markdown/json/plain)
 
