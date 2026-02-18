@@ -316,7 +316,8 @@ All tools must be executed in **strict headless mode**.
 - **Scopes:** comments, strings, imports, fn/func/def, class, struct, enum, trait, mod, etc. (language-specific)
 - **Composable Actions:** `-u/-l/-t` (case), `-n` (normalize), `-g` (german), `-S` (symbols: →, ≠, ≤, ≥)
 - **Standalone Actions:** `-d` (delete), `-s` (squeeze)
-- **Options:** `--glob`, `--dry-run`, `-j` (OR scopes, default AND), `--invert`, `-L` (literal), `--fail-none`
+- **Options:** `--glob` (single value, cannot repeat), `--dry-run`, `-j` (OR scopes, default AND), `--invert`, `-L` (literal), `--fail-none`
+- **Glob:** single `--glob` flag (pattern matches many files). Syntax: `*`/`?`/`[...]`/`**` (no `{a,b}`). Per-file: `fd -e <ext> --strip-cwd-prefix -x srgn --glob '{}' --stdin-detection force-unreadable [OPTIONS] [PATTERN]`
 - **Dynamic Filter:** `fn~PATTERN`, `struct~[tT]est`, `func~Handle` (regex on element names)
 - **Scope Intersection:** `srgn --rust pub-enum --rust type-identifier 'Type'` (AND by default)
 - **Search Mode:** `srgn --go 'struct~[tT]est'` (no action = search)
