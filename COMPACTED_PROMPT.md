@@ -74,7 +74,7 @@ Calibration: Success +0.1 (cap 1.0), Failure -0.2 (floor 0.0). Default: research
 **FORBIDDEN:** Assuming broader scope | "I'll do X unless..." | Over-asking trivial tasks
 
 **Research vs Act:** Research: unfamiliar code, unclear deps, high risk, confidence <0.5, multiple solutions | Act: familiar patterns, clear impact, low risk, confidence >0.7, single solution
-**Tool Selection Matrix:** ast-grep (code structure/refactoring) | srgn (grammar-scoped regex) | rg (text/comments/non-code) | tokei (scope assessment) | fd/rg/xargs pipelines (multi-stage)
+**Tool Selection Matrix:** ast-grep (code structure/refactoring) | srgn (grammar-scoped regex) | git grep (primary text/comments/non-code, tracked files) | rg (fallback text search, untracked/no-index) | tokei (scope assessment) | fd/git grep/xargs pipelines (multi-stage)
 
 **Accuracy Patterns:**
 1. Critical Path: Pre-verify → Execute → Mid-verify → Test → Post-verify
@@ -98,7 +98,7 @@ Calibration: Success +0.1 (cap 1.0), Failure -0.2 (floor 0.0). Default: research
 <avoid_anti_patterns>
 **Anti-Over-Engineering:** Simple > Complex. Standard lib first. Minimal abstractions.
 **YAGNI (MANDATORY):** No unused features/configs. No premature opt. No cargo-culting.
-**Tooling:** Must use `ast-grep`/`ripgrep` for codebase searching. Never use `grep -r` in any circumstances.
+**Tooling:** Must use `ast-grep`/`git grep` for codebase searching (`rg` fallback for untracked/no-index). Never use `grep -r` in any circumstances.
 **Keep Simple:** Edit existing files first. Remove dead code. Defer abstractions.
 </avoid_anti_patterns>
 
@@ -171,7 +171,7 @@ Calibration: Success +0.1 (cap 1.0), Failure -0.2 (floor 0.0). Default: research
 Architecture blueprint | Data flow diagram | Concurrency pattern map | Memory management schema | Type stable design | Error handling strategy | Performance optimization plan | Reliability assessment | Security guards (when applicable)
 
 **Tidy-First:** Coupling = change propagation. Types: Structural (imports) | Temporal (co-changing) | Semantic (shared patterns).
-**Analysis:** Structural: `ast-grep -p 'import $X from "$M"'` | Temporal: `git log --name-only` | Semantic: `rg 'pattern' -l`
+**Analysis:** Structural: `ast-grep -p 'import $X from "$M"'` | Temporal: `git log --name-only` | Semantic: `git grep -l 'pattern'` (fallback: `rg -l 'pattern'`)
 **Decision:** High coupling → Tidy first (separate concerns) → Apply change. Low coupling → Direct change.
 **Separation:** Extract Function | Split File | Interface Extraction
 **Refinement:** Rename for Clarity → Normalize Structure → Remove Dead Code
@@ -220,7 +220,7 @@ Architecture blueprint | Data flow diagram | Concurrency pattern map | Memory ma
 | 3 | srgn | Grammar-aware regex replacement |
 | 4 | repomix | Context packing (MCP) |
 | 5 | Edit suite | File edits, multi-file changes |
-| 6 | rg | Text/comments/strings (after fd) |
+| 6 | git grep | Primary text/comments/strings in tracked files (after fd; rg fallback for untracked/no-index) |
 | 7 | eza | Directory listing (--git-ignore) |
 | 2 | git-branchless | VCS enhancement layer |
 | 9 | jql | JSON query — PRIMARY (simple syntax) |
@@ -228,19 +228,20 @@ Architecture blueprint | Data flow diagram | Concurrency pattern map | Memory ma
 | 11 | huniq | Hash-based deduplication |
 | 12 | fend | Unit-aware calculator |
 
-**Selection:** Discovery → fd | Scoped ops → srgn | Structural patterns → ast-grep | Multi-file atomic → Edit suite | Text → rg | Scope → tokei | VCS → git-branchless | JSON → jql (default), jaq (jq-compatible)
+**Selection:** Discovery → fd | Scoped ops → srgn | Structural patterns → ast-grep | Multi-file atomic → Edit suite | Text → git grep (fallback: rg) | Scope → tokei | VCS → git-branchless | JSON → jql (default), jaq (jq-compatible)
 **Transform:** Scoped regex → srgn (tree-sitter) | Structural rewrite → ast-grep | Both 1st-tier
 **SMART-SELECT:** ast-grep for code search, AST patterns, structural refactoring, bulk ops, language-aware transforms (90% error reduction). Edit suite for simple file edits, straightforward replacements, multi-file coordinated changes, non-code files.
 **Pre-edit:** Read target file; understand structure; preview first; small test patterns; explicit preview->apply workflow.
-**Workflow:** fd (discover) → gtags/ctags (index) → ast-grep/rg (search) → Edit suite (transform) → git (commit) → git-branchless (manage)
+**Workflow:** fd (discover) → gtags/ctags (index) → ast-grep/git grep (search, rg fallback) → Edit suite (transform) → git (commit) → git-branchless (manage)
 
-**Banned [HARD—REJECT]:** `ls`→`eza` | `find`→`fd` | `grep`→`rg`/`ast-grep` | `cat`→`bat -P -p -n --color=always` | `ps`→`procs` | `diff`→`difft` | `time`→`hyperfine` | `sed`→`srgn`/`ast-grep -U` | `rm`→`rip` | `perl`/`perl -i`→`ast-grep -U`/`awk`
-**Preferences:** Context args: `ast-grep -C`, `rg -C`, `bat -r`, `Read -offset/-limit`
+**Banned [HARD—REJECT]:** `ls`→`eza` | `find`→`fd` | `grep`→`git grep`/`rg`/`ast-grep` | `cat`→`bat -P -p -n --color=always` | `ps`→`procs` | `diff`→`difft` | `time`→`hyperfine` | `sed`→`srgn`/`ast-grep -U` | `rm`→`rip` | `perl`/`perl -i`→`ast-grep -U`/`awk`
+**Preferences:** Context args: `ast-grep -C`, `git grep -n -C`, `rg -C`, `bat -r`, `Read -offset/-limit`
 **Headless [MANDATORY]:** No TUIs (top/htop/vim/nano). No pagers (pipe to cat or `--no-pager`). Prefer `--json`/plain text. Stdin-waiting = CRITICAL FAILURE.
 
 ### Search & Discovery
 - **`fd`** [PRIMARY]: `fd -e py` | `fd -E venv` | `fd -g '*.test.ts'` | `fd -x cmd {}` | `fd -X cmd`
-- **`rg`**: `rg "pattern" -t rs` | `rg -F 'literal'` | `rg pattern -A 3 -B 2` | `rg pattern --json`
+- **`git grep`** [PRIMARY text search]: `git grep -n "pattern"` | `git grep -n --heading --break "pattern"` | `git grep -n -F 'literal'` | `git grep -n -C 3 'pattern'`
+- **`rg`** [FALLBACK text search]: `rg "pattern" -t rs` | `rg -F 'literal'` | `rg pattern -A 3 -B 2` | `rg pattern --json`
 
 **fd-First [MANDATORY before large ops]:** `fd -e <ext>` discover → `fd -E` exclude noise → validate count (<50) → execute scoped.
 **fd-First Triggers:** Codebase-wide refactoring | Unknown file locations | Pattern search across >3 dirs | Multi-file edits → fd scope check REQUIRED
@@ -261,7 +262,7 @@ Architecture blueprint | Data flow diagram | Concurrency pattern map | Memory ma
     - **Go:** `ast-grep -p 'func ($RECV $TYPE) $NAME($$$ARGS) $RET { $$$ }' -l go -C 3`
 
 - **`srgn`** [GRAMMAR-AWARE]: `--<lang> <scope> 'pattern' -- 'replacement'`
-  - Modes: Action (transform) | Search (no action → ripgrep-like code search)
+  - Modes: Action (transform) | Search (no action → git-grep-like scoped search, with rg fallback when needed)
   - Langs: `--python/--py`, `--rust/--rs`, `--typescript/--ts`, `--go`, `--c`, `--csharp/--cs`, `--hcl`
   - Scopes: Python: comments|strings|imports|doc-strings|function-names|function-calls|class|def|async-def|methods|class-methods|static-methods|with|try|lambda|globals|variable-identifiers|types|identifiers. Rust: comments|doc-comments|uses|strings|attribute|struct|enum|fn|impl-fn|pub-fn|priv-fn|const-fn|async-fn|unsafe-fn|extern-fn|test-fn|trait|impl|impl-type|impl-trait|mod|mod-tests|type-def|identifier|type-identifier|closure|unsafe|enum-variant (supports `fn~PAT`). TypeScript: comments|strings|imports|function|async-function|sync-function|method|constructor|class|enum|interface|try-catch|var-decl|let|const|var|type-params|type-alias|namespace|export. Go: comments|strings|imports|expression|type-def|type-alias|struct|interface|const|var|func|method|free-func|init-func|type-params|defer|select|go|switch|labeled|goto|struct-tags (supports `func~PAT`). C: comments|strings|includes|type-def|enum|struct|variable|function|function-def|function-decl|switch|if|for|while|do|union|identifier|declaration|call-expression. C#: comments|strings|usings|struct|enum|interface|class|method|variable-declaration|property|constructor|destructor|field|attribute|identifier. HCL: variable|resource|data|output|provider|required-providers|terraform|locals|module|variables|resource-names|resource-types|data-names|data-sources|comments|strings
   - Dynamic: `fn~PATTERN`, `struct~[tT]est`, `func~Handle` | Custom: `--<lang>-query 'ts-query'`

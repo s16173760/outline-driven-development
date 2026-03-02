@@ -98,7 +98,7 @@ Calibration: Success +0.1 (cap 1.0), Failure -0.2 (floor 0.0). Default: research
 |--------|-------------|
 | `ls` | `eza` |
 | `find` | `fd` |
-| `grep` | `rg` / `ast-grep` |
+| `grep` | `git grep` / `rg` / `ast-grep` |
 | `cat` | `bat -P -p -n --color=always` |
 | `ps` | `procs` |
 | `diff` | `difft` |
@@ -106,17 +106,17 @@ Calibration: Success +0.1 (cap 1.0), Failure -0.2 (floor 0.0). Default: research
 | `sed` | `srgn` / `ast-grep -U` |
 | `rm` | `rip` |
 
-**Preferences:** Context args: `ast-grep -C`, `rg -C`, `bat -r`. Read with offset/limit for large files.
+**Preferences:** Context args: `ast-grep -C`, `git grep -n -C`, `rg -C`, `bat -r`. Read with offset/limit for large files.
 **Headless [MANDATORY]:** No TUIs (top/htop/vim/nano). No pagers (pipe to cat or `--no-pager`). Prefer `--json`/plain text. Stdin-waiting = CRITICAL FAILURE.
 **File Operations:** ALWAYS read before edit. Prefer `native-patch` for edits. NEVER write new files unless explicitly required. Edit existing > create new.
 
-**fd-First [MANDATORY]:** Before ast-grep/rg/multi-file edits:
+**fd-First [MANDATORY]:** Before ast-grep/git grep/rg/multi-file edits:
 1. `fd -e <ext>` discover files
 2. `fd -E` exclude noise (node_modules, venv, target, dist, .git)
 3. Validate count (<50 files) before proceeding
 4. Execute scoped operation on validated file set
-**Enforcement triggers:** ast-grep across dirs | rg broad patterns | srgn multi-file | batch edits
-**Patterns:** `fd -e rs -E target` → `ast-grep run -p '$PAT' -l rs` | `fd -e ts -E node_modules` → `rg 'pattern' -t ts`
+**Enforcement triggers:** ast-grep across dirs | git grep broad patterns (rg fallback) | srgn multi-file | batch edits
+**Patterns:** `fd -e rs -E target` → `ast-grep run -p '$PAT' -l rs` | `fd -e ts -E node_modules` → `git grep -n 'pattern' -- '*.ts'` (fallback: `rg 'pattern' -t ts`)
 
 **BEFORE coding:** Prime problem class, constraints, I/O spec, metrics, unknowns, standards/APIs.
 **CS anchors:** ADTs, invariants, contracts, O(?) complexity, partial vs total functions | Structure selection, worst/avg/amortized analysis, space/time trade-offs, cache locality | Unit/property/fuzz/integration, assertions/contracts, rollback strategy
@@ -155,7 +155,7 @@ Calibration: Success +0.1 (cap 1.0), Failure -0.2 (floor 0.0). Default: research
 | 3 | srgn | Grammar-aware regex replacement within AST scopes |
 | 4 | repomix | Context packing (MCP) for AI consumption |
 | 5 | native-patch | File edits, multi-file changes |
-| 6 | rg | Text/comments/strings (always after fd scoping) |
+| 6 | git grep | Primary text/comments/strings in tracked files (always after fd; rg fallback for untracked/no-index) |
 | 7 | eza | Directory listing (--git-ignore) |
 | 8 | jql/jaq | JSON query and transformation |
 | 9 | huniq | Hash-based deduplication |
@@ -164,8 +164,8 @@ Calibration: Success +0.1 (cap 1.0), Failure -0.2 (floor 0.0). Default: research
 ### Selection Guide
 
 **By task type:**
-- **Structural code transforms:** ast-grep (pattern match + rewrite) > srgn (grammar-scoped regex) > rg (plain text)
-- **Multi-file discovery:** fd (find files) → rg (search content) → ast-grep (structural match)
+- **Structural code transforms:** ast-grep (pattern match + rewrite) > srgn (grammar-scoped regex) > git grep (plain text, rg fallback)
+- **Multi-file discovery:** fd (find files) → git grep (search content, rg fallback) → ast-grep (structural match)
 - **Transform selection:** ast-grep -U (structural) | srgn (scoped regex) | native-patch (manual/complex)
 - **Verification:** difft (structural diff) | ast-grep (re-scan) | tokei (metrics delta)
 
@@ -174,7 +174,7 @@ Calibration: Success +0.1 (cap 1.0), Failure -0.2 (floor 0.0). Default: research
 |-------|------|
 | Known AST pattern | ast-grep |
 | Known scope (comments/strings/imports) | srgn |
-| Plain text/regex pattern | rg |
+| Plain text/regex pattern | git grep (fallback: rg) |
 | File discovery by extension/name | fd |
 | Code metrics/scope assessment | tokei |
 | JSON data query | jql/jaq |
@@ -188,7 +188,8 @@ Calibration: Success +0.1 (cap 1.0), Failure -0.2 (floor 0.0). Default: research
 
 ### Search & Discovery
 - **`fd`** [PRIMARY]: `fd -e py` | `fd -E venv` | `fd -g '*.test.ts'` | `fd -x cmd {}` | `fd -X cmd`
-- **`rg`**: `rg "pattern" -t rs` | `rg -F 'literal'` | `rg pattern -A 3 -B 2` | `rg pattern --json`
+- **`git grep`** [PRIMARY text search]: `git grep -n "pattern"` | `git grep -n --heading --break "pattern"` | `git grep -n -F 'literal'` | `git grep -n -C 3 'pattern'`
+- **`rg`** [FALLBACK text search]: `rg "pattern" -t rs` | `rg -F 'literal'` | `rg pattern -A 3 -B 2` | `rg pattern --json`
 - **`tokei`**: `tokei ./src` | `tokei --output json` | `tokei --files` — ALWAYS run first to assess scope
 
 ### Code Manipulation
@@ -297,7 +298,7 @@ Per-file when glob insufficient: `fd -e <ext> --strip-cwd-prefix -x srgn --glob 
 
 ### Quickstart Workflow
 1. **Requirements:** Brief checklist (3-10 items), note constraints/unknowns
-2. **Context:** Gather only essential context, targeted searches via fd → rg → ast-grep
+2. **Context:** Gather only essential context, targeted searches via fd → git grep (rg fallback) → ast-grep
 3. **Design:** Sketch delta diagrams (architecture, data-flow, concurrency, memory, optimization, tidiness)
 4. **Contract:** Define inputs/outputs, invariants, error modes, 3-5 edge cases
 5. **Implementation:** Search (`ast-grep`) → Edit (`ast-grep`/`native-patch`) → `git sl` (verify graph) → State (`git branchless move --fixup`) → Iterate
@@ -333,13 +334,13 @@ Per-file when glob insufficient: `fd -e <ext> --strip-cwd-prefix -x srgn --glob 
 - `fd -e rs -x wc -l {} | awk '$1 > 500'` — find large files
 - `fd -e ts -X tokei` — metrics for found files
 
-### rg Patterns & Usage
-**Basic:** `rg 'pattern' -t rs` | `rg -F 'literal string'` | `rg 'regex' --pcre2`
-**Context:** `rg pattern -A 3 -B 2` (after/before) | `rg pattern -C 5` (both)
-**Output:** `rg pattern --json` | `rg pattern -l` (files only) | `rg pattern -c` (count)
-**Filtering:** `rg pattern -t py` (type) | `rg pattern -g '*.ts'` (glob) | `rg pattern -g '!test*'` (exclude)
-**Advanced:** `rg pattern --multiline` | `rg pattern --replace 'new'` | `rg pattern -w` (word boundary)
-**Combine with fd:** `fd -e rs | xargs rg 'pattern'` or `rg pattern $(fd -e rs)`
+### git grep Patterns & Usage
+**Basic:** `git grep -n 'pattern'` | `git grep -n -F 'literal string'` | `git grep -n -E 'regex'`
+**Context:** `git grep -n -A 3 -B 2 'pattern'` (after/before) | `git grep -n -C 5 'pattern'` (both)
+**Output:** `git grep -n --heading --break 'pattern'` | `git grep -l 'pattern'` (files only) | `git grep -c 'pattern'` (count)
+**Filtering:** `git grep -n 'pattern' -- '*.py'` (pathspec) | `git grep -n 'pattern' -- 'src/**/*.ts'` | `git grep -n 'pattern' -- ':!test*'`
+**Advanced:** `git grep -n --and -e 'foo' -e 'bar'` | `git grep -n -P 'pattern'` | `git grep -n -w 'pattern'` (word boundary)
+**Fallback with rg:** Use `rg` for untracked files or `--no-index` workflows: `rg 'pattern' -t rs` | `rg pattern -A 3 -B 2`
 
 ### tokei Usage
 **Scope assessment (run FIRST):**
@@ -425,7 +426,7 @@ Tactics: dry-run first, checkpoint before apply, subset test, incremental verify
 | Task | Tool | Example |
 |------|------|---------|
 | Find files | fd | `fd -e ts -E node_modules` |
-| Search code | rg | `rg 'pattern' -t rs -C 3` |
+| Search code | git grep (fallback: rg) | `git grep -n 'pattern' -C 3` |
 | AST match | ast-grep | `ast-grep run -p '$PAT' -l ts` |
 | AST rewrite | ast-grep | `ast-grep run -p '$OLD' -r '$NEW' -U` |
 | Scoped replace | srgn | `srgn --py comments 'TODO' -- 'DONE'` |

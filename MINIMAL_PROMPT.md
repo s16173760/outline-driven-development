@@ -29,15 +29,15 @@ Auto-Skip: <50 LOC, trivial, user requests direct. Mandatory: 2+ concerns, 2+ di
 <tools>
 **Primary:** `tokei` (scope), `fd` (discover), `ast-grep` (code), `srgn` (regex), `repomix` (context, compress recommended)
 **Transform Selection:** Scoped → srgn | Structural → ast-grep (both tree-sitter)
-**Support:** `eza` (list), `bat -P -p -n --color=always` (read), `rg` (text), `difft` (diff), `jql`/`jaq` (JSON), `fend` (calc)
+**Support:** `eza` (list), `bat -P -p -n --color=always` (read), `git grep` (primary text), `rg` (fallback text), `difft` (diff), `jql`/`jaq` (JSON), `fend` (calc)
 
-**BANNED:** `ls`→eza | `find`→fd | `grep -r`→rg/ast-grep | `cat`→`bat -P -p -n --color=always` | `sed -i`→ast-grep -U/srgn | `diff`→difft | `ps`→procs | `time`→hyperfine | `rm`→rip | `perl -i`→ast-grep/awk
+**BANNED:** `ls`→eza | `find`→fd | `grep -r`→git grep/rg/ast-grep | `cat`→`bat -P -p -n --color=always` | `sed -i`→ast-grep -U/srgn | `diff`→difft | `ps`→procs | `time`→hyperfine | `rm`→rip | `perl -i`→ast-grep/awk
 
-**Prefer:** context args `ast-grep -C`, `rg -C`, `bat -r`
+**Prefer:** context args `ast-grep -C`, `git grep -n -C`, `rg -C`, `bat -r`
 
 **Headless [MANDATORY]:** No TUIs. No pagers. `--json` preferred. Stdin-wait = failure.
 
-**fd-First [MANDATORY]:** Before large ops: `fd -e <ext> -E <exclude>` → validate scope → execute
+**fd-First [MANDATORY]:** Before large ops: `fd -e <ext> -E <exclude>` → validate scope → execute (`git grep` primary text search, `rg` fallback)
 
 **Thinking:** `sequential-thinking` [ALWAYS] | `actor-critic-thinking` | `shannon-thinking`
 
