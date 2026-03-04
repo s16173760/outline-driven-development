@@ -245,6 +245,7 @@ Architecture blueprint | Data flow diagram | Concurrency pattern map | Memory ma
 
 **fd-First [MANDATORY before large ops]:** `fd -e <ext>` discover → `fd -E` exclude noise → validate count (<50) → execute scoped.
 **fd-First Triggers:** Codebase-wide refactoring | Unknown file locations | Pattern search across >3 dirs | Multi-file edits → fd scope check REQUIRED
+**fd constraint:** `--strip-cwd-prefix` is INCOMPATIBLE with `[path]` positional args (fd >=10). Use only from CWD; for scoped search: `fd -e <ext> <path>` (no strip flag) or `cd <dir> && fd -e <ext> --strip-cwd-prefix`.
 **fd patterns:** `fd -e py -E venv` | `fd -e rs --max-depth 3` | `fd -g '*.test.ts'` | `fd . src/ -e tsx` | `fd -H pattern`
 **Placeholders:** `{}` (full) | `{/}` (basename) | `{//}` (parent) | `{.}` (no ext) | `{/.}` (basename no ext)
 **Execute:** Per-file: `fd -e rs -x rustfmt {}` | Batch: `fd -e py -X black` | Parallel: `fd -j 4 -e rs -x cargo fmt` | Recent: `fd -e ts --changed-within 1d` | Size: `fd -e json -S +1k`
@@ -268,7 +269,7 @@ Architecture blueprint | Data flow diagram | Concurrency pattern map | Memory ma
   - Dynamic: `fn~PATTERN`, `struct~[tT]est`, `func~Handle` | Custom: `--<lang>-query 'ts-query'`
   - Actions: `-u` (upper) `-l` (lower) `-t` (title) `-n` (normalize) `-S` (symbols) `-d` (delete) `-s` (squeeze)
   - Options: `--glob` (single value, cannot repeat) `--dry-run` `-j` (OR scopes) `--invert` `-L` (literal) `-H` (hidden) `--sorted`
-  - Per-file: `fd -e <ext> --strip-cwd-prefix -x srgn --glob '{}' --stdin-detection force-unreadable [OPTIONS]`
+  - Per-file (CWD only—no [path] arg): `fd -e <ext> --strip-cwd-prefix -x srgn --glob '{}' --stdin-detection force-unreadable [OPTIONS]`
   - Scope Intersection: `srgn --rust pub-enum --rust type-identifier 'Type'` (AND by default)
   - vs ast-grep: srgn = scoped regex in AST nodes | ast-grep = structural patterns with metavariables
 

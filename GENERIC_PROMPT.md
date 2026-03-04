@@ -253,7 +253,7 @@ variable | resource | data | output | provider | required-providers | terraform 
 
 **Glob Handling:**
 Single `--glob` flag (pattern matches many files). Syntax: `*`/`?`/`[...]`/`**` (no `{a,b}`).
-Per-file when glob insufficient: `fd -e <ext> --strip-cwd-prefix -x srgn --glob '{}' --stdin-detection force-unreadable [OPTIONS] [PATTERN]`
+Per-file when glob insufficient (CWD only—no [path] arg): `fd -e <ext> --strip-cwd-prefix -x srgn --glob '{}' --stdin-detection force-unreadable [OPTIONS] [PATTERN]`
 
 **Dynamic Filtering:**
 `fn~PATTERN` | `struct~[tT]est` | Custom tree-sitter: `--<lang>-query 'ts-query'`
@@ -330,7 +330,8 @@ Per-file when glob insufficient: `fd -e <ext> --strip-cwd-prefix -x srgn --glob 
 
 **Surgical patterns (fd + tools):**
 - `fd -e rs -x ast-grep run -p '$PAT' {}` — AST search per Rust file
-- `fd -e ts --strip-cwd-prefix -x srgn --glob '{}' --stdin-detection force-unreadable --typescript strings 'old' -- 'new'` — scoped replace per TS file
+- `fd -e ts --strip-cwd-prefix -x srgn --glob '{}' --stdin-detection force-unreadable --typescript strings 'old' -- 'new'` — scoped replace per TS file (CWD only—no [path] arg)
+- `cd <dir> && fd -e ts --strip-cwd-prefix -x srgn --glob '{}' --stdin-detection force-unreadable --typescript strings 'old' -- 'new'` — scoped replace (cd first, then CWD search)
 - `fd -e rs -x wc -l {} | awk '$1 > 500'` — find large files
 - `fd -e ts -X tokei` — metrics for found files
 
